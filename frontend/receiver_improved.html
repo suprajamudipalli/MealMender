@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Find Food · MealMender</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="css/modern-style.css">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .filter-card {
+      background: white;
+      border-radius: 1rem;
+      padding: 1.5rem;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+      margin-bottom: 2rem;
+    }
+    
+    .food-card {
+      transition: all 0.3s ease;
+      border: 1px solid #e5e7eb;
+      border-radius: 1rem;
+      overflow: hidden;
+    }
+    
+    .food-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    }
+    
+    .food-type-badge {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      padding: 0.5rem 1rem;
+      border-radius: 50px;
+      font-weight: 600;
+      font-size: 0.875rem;
+    }
+    
+    .expiry-warning {
+      background: #fef3c7;
+      color: #92400e;
+      padding: 0.5rem;
+      border-radius: 0.5rem;
+      font-size: 0.875rem;
+      margin-top: 0.5rem;
+    }
+    
+    .distance-badge {
+      background: #dbeafe;
+      color: #1e40af;
+      padding: 0.25rem 0.75rem;
+      border-radius: 50px;
+      font-size: 0.8125rem;
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar will be injected -->
+
+  <div class="container my-5">
+    <!-- Hero Section -->
+    <div class="text-center mb-5">
+      <h1 class="display-4 fw-bold mb-3">
+        <i class="fas fa-search text-success me-3"></i>Find Available Food
+      </h1>
+      <p class="lead text-muted">Discover fresh meals and help reduce food waste in your community</p>
+    </div>
+
+    <!-- Advanced Filters -->
+    <div class="filter-card">
+      <div class="row g-3">
+        <div class="col-md-3">
+          <label class="form-label fw-semibold">
+            <i class="fas fa-utensils text-success me-2"></i>Food Type
+          </label>
+          <select id="filter-type" class="form-select">
+            <option value="">All Types</option>
+            <option value="vegetables">🥕 Vegetables</option>
+            <option value="fruits">🍎 Fruits</option>
+            <option value="cooked">🍲 Cooked Meals</option>
+            <option value="bakery">🍞 Bakery</option>
+            <option value="dairy">🥛 Dairy</option>
+            <option value="other">📦 Other</option>
+          </select>
+        </div>
+        
+        <div class="col-md-3">
+          <label class="form-label fw-semibold">
+            <i class="fas fa-clock text-success me-2"></i>Expiry
+          </label>
+          <select id="filter-expiry" class="form-select">
+            <option value="">Any Time</option>
+            <option value="today">Today</option>
+            <option value="tomorrow">Tomorrow</option>
+            <option value="week">This Week</option>
+          </select>
+        </div>
+        
+        <div class="col-md-3">
+          <label class="form-label fw-semibold">
+            <i class="fas fa-weight text-success me-2"></i>Quantity
+          </label>
+          <select id="filter-quantity" class="form-select">
+            <option value="">Any Amount</option>
+            <option value="small">Small (1-5 servings)</option>
+            <option value="medium">Medium (6-15 servings)</option>
+            <option value="large">Large (16+ servings)</option>
+          </select>
+        </div>
+        
+        <div class="col-md-3">
+          <label class="form-label fw-semibold">
+            <i class="fas fa-sort text-success me-2"></i>Sort By
+          </label>
+          <select id="filter-sort" class="form-select">
+            <option value="newest">Newest First</option>
+            <option value="expiry">Expiring Soon</option>
+            <option value="quantity">Most Quantity</option>
+          </select>
+        </div>
+      </div>
+      
+      <div class="mt-3 d-flex gap-2">
+        <button id="apply-filters" class="btn btn-primary">
+          <i class="fas fa-filter me-2"></i>Apply Filters
+        </button>
+        <button id="clear-filters" class="btn btn-outline-secondary">
+          <i class="fas fa-times me-2"></i>Clear
+        </button>
+      </div>
+    </div>
+
+    <!-- Results Count -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <h5 class="mb-0">
+        <span id="results-count">0</span> donations available
+      </h5>
+      <button class="btn btn-outline-success" onclick="window.location.reload()">
+        <i class="fas fa-sync-alt me-2"></i>Refresh
+      </button>
+    </div>
+
+    <!-- Loading State -->
+    <div id="loading-state" class="text-center py-5">
+      <div class="spinner-border text-success" style="width: 3rem; height: 3rem;"></div>
+      <p class="mt-3 text-muted">Loading available food...</p>
+    </div>
+
+    <!-- Empty State -->
+    <div id="empty-state" class="text-center py-5 d-none">
+      <i class="fas fa-inbox fa-4x text-muted mb-3"></i>
+      <h4>No donations available</h4>
+      <p class="text-muted">Check back soon or adjust your filters</p>
+    </div>
+
+    <!-- Error State -->
+    <div id="error-state" class="d-none">
+      <div class="alert alert-danger" role="alert">
+        <h5 class="alert-heading"><i class="fas fa-exclamation-triangle me-2"></i>Error Loading Donations</h5>
+        <p id="error-message">Something went wrong. Please try again.</p>
+        <hr>
+        <button class="btn btn-sm btn-danger" onclick="window.location.reload()">
+          <i class="fas fa-redo me-2"></i>Retry
+        </button>
+      </div>
+    </div>
+
+    <!-- Donations Grid -->
+    <div id="donations-container" class="row g-4">
+      <!-- Donations will be loaded here -->
+    </div>
+
+    <!-- Pagination -->
+    <div id="pagination-container" class="mt-5 d-flex justify-content-center">
+      <!-- Pagination will be loaded here -->
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="config.js"></script>
+  <script src="nav.js"></script>
+  <script>
+    // Ensure API_BASE_URL is defined
+    if (typeof window.API_BASE_URL === 'undefined') {
+      console.error('API_BASE_URL is not defined!');
+      window.API_BASE_URL = 'http://localhost:5000'; // Fallback
+    }
+
+    let allDonations = [];
+    let filteredDonations = [];
+
+    document.addEventListener('DOMContentLoaded', () => {
+      loadDonations();
+      
+      document.getElementById('apply-filters').addEventListener('click', applyFilters);
+      document.getElementById('clear-filters').addEventListener('click', clearFilters);
+    });
+
+    async function loadDonations() {
+      const loadingState = document.getElementById('loading-state');
+      const errorState = document.getElementById('error-state');
+      const emptyState = document.getElementById('empty-state');
+      const container = document.getElementById('donations-container');
+
+      try {
+        loadingState.classList.remove('d-none');
+        errorState.classList.add('d-none');
+        emptyState.classList.add('d-none');
+
+        const response = await fetch(`${window.API_BASE_URL}/api/donations`);
+        
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+
+        const data = await response.json();
+        allDonations = Array.isArray(data) ? data : (data.donations || []);
+        filteredDonations = [...allDonations];
+
+        loadingState.classList.add('d-none');
+
+        if (filteredDonations.length === 0) {
+          emptyState.classList.remove('d-none');
+        } else {
+          displayDonations(filteredDonations);
+        }
+
+      } catch (error) {
+        console.error('Error loading donations:', error);
+        loadingState.classList.add('d-none');
+        errorState.classList.remove('d-none');
+        document.getElementById('error-message').textContent = error.message;
+      }
+    }
+
+    function displayDonations(donations) {
+      const container = document.getElementById('donations-container');
+      const resultsCount = document.getElementById('results-count');
+      
+      resultsCount.textContent = donations.length;
+      container.innerHTML = '';
+
+      donations.forEach(donation => {
+        container.innerHTML += createDonationCard(donation);
+      });
+    }
+
+    function createDonationCard(donation) {
+      const expiryDate = new Date(donation.expiry);
+      const today = new Date();
+      const daysUntilExpiry = Math.ceil((expiryDate - today) / (1000 * 60 * 60 * 24));
+      const isExpiringSoon = daysUntilExpiry <= 2;
+
+      const typeColors = {
+        'vegetables': 'bg-success',
+        'fruits': 'bg-warning',
+        'cooked': 'bg-danger',
+        'bakery': 'bg-info',
+        'dairy': 'bg-primary',
+        'other': 'bg-secondary'
+      };
+
+      const typeColor = typeColors[donation.type] || 'bg-secondary';
+
+      return `
+        <div class="col-md-6 col-lg-4">
+          <div class="card food-card h-100">
+            <div class="card-body position-relative">
+              <span class="food-type-badge ${typeColor} text-white">
+                ${donation.type || 'Other'}
+              </span>
+              
+              <h5 class="card-title mt-4 mb-3">${donation.foodName}</h5>
+              
+              <div class="mb-2">
+                <i class="fas fa-weight-hanging text-success me-2"></i>
+                <strong>Quantity:</strong> ${donation.quantity}
+              </div>
+              
+              <div class="mb-2">
+                <i class="fas fa-star text-warning me-2"></i>
+                <strong>Quality:</strong> ${donation.quality || 'Good'}
+              </div>
+              
+              <div class="mb-2">
+                <i class="fas fa-map-marker-alt text-danger me-2"></i>
+                <strong>Location:</strong> ${donation.pickupLocation || 'Not specified'}
+              </div>
+              
+              <div class="mb-2">
+                <i class="fas fa-user text-info me-2"></i>
+                <strong>Donor:</strong> ${donation.donor?.firstName || 'Anonymous'}
+              </div>
+              
+              ${isExpiringSoon ? `
+                <div class="expiry-warning">
+                  <i class="fas fa-exclamation-triangle me-2"></i>
+                  Expires in ${daysUntilExpiry} day${daysUntilExpiry !== 1 ? 's' : ''}!
+                </div>
+              ` : `
+                <div class="text-muted small mt-2">
+                  <i class="fas fa-calendar me-2"></i>
+                  Expires: ${expiryDate.toLocaleDateString()}
+                </div>
+              `}
+              
+              ${donation.notes ? `
+                <div class="mt-3 p-2 bg-light rounded">
+                  <small class="text-muted">${donation.notes}</small>
+                </div>
+              ` : ''}
+              
+              <div class="mt-3 d-grid">
+                <a href="request_food.html?id=${donation._id}" class="btn btn-success">
+                  <i class="fas fa-hand-holding-heart me-2"></i>Request This Food
+                </a>
+              </div>
+            </div>
+            <div class="card-footer bg-light text-muted small">
+              <i class="fas fa-clock me-2"></i>Posted ${getTimeAgo(donation.createdAt)}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function applyFilters() {
+      const typeFilter = document.getElementById('filter-type').value;
+      const expiryFilter = document.getElementById('filter-expiry').value;
+      const quantityFilter = document.getElementById('filter-quantity').value;
+      const sortFilter = document.getElementById('filter-sort').value;
+
+      filteredDonations = allDonations.filter(donation => {
+        // Type filter
+        if (typeFilter && donation.type !== typeFilter) return false;
+
+        // Expiry filter
+        if (expiryFilter) {
+          const expiryDate = new Date(donation.expiry);
+          const today = new Date();
+          const daysUntilExpiry = Math.ceil((expiryDate - today) / (1000 * 60 * 60 * 24));
+
+          if (expiryFilter === 'today' && daysUntilExpiry !== 0) return false;
+          if (expiryFilter === 'tomorrow' && daysUntilExpiry !== 1) return false;
+          if (expiryFilter === 'week' && daysUntilExpiry > 7) return false;
+        }
+
+        // Quantity filter
+        if (quantityFilter) {
+          const qty = parseInt(donation.quantity);
+          if (quantityFilter === 'small' && qty > 5) return false;
+          if (quantityFilter === 'medium' && (qty < 6 || qty > 15)) return false;
+          if (quantityFilter === 'large' && qty < 16) return false;
+        }
+
+        return true;
+      });
+
+      // Sort
+      if (sortFilter === 'newest') {
+        filteredDonations.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      } else if (sortFilter === 'expiry') {
+        filteredDonations.sort((a, b) => new Date(a.expiry) - new Date(b.expiry));
+      } else if (sortFilter === 'quantity') {
+        filteredDonations.sort((a, b) => parseInt(b.quantity) - parseInt(a.quantity));
+      }
+
+      if (filteredDonations.length === 0) {
+        document.getElementById('empty-state').classList.remove('d-none');
+        document.getElementById('donations-container').innerHTML = '';
+      } else {
+        document.getElementById('empty-state').classList.add('d-none');
+        displayDonations(filteredDonations);
+      }
+    }
+
+    function clearFilters() {
+      document.getElementById('filter-type').value = '';
+      document.getElementById('filter-expiry').value = '';
+      document.getElementById('filter-quantity').value = '';
+      document.getElementById('filter-sort').value = 'newest';
+      
+      filteredDonations = [...allDonations];
+      displayDonations(filteredDonations);
+    }
+
+    function getTimeAgo(dateString) {
+      const date = new Date(dateString);
+      const now = new Date();
+      const seconds = Math.floor((now - date) / 1000);
+
+      if (seconds < 60) return 'just now';
+      if (seconds < 3600) return `${Math.floor(seconds / 60)} minutes ago`;
+      if (seconds < 86400) return `${Math.floor(seconds / 3600)} hours ago`;
+      return `${Math.floor(seconds / 86400)} days ago`;
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Request Food · MealMender</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="css/modern-style.css">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .food-preview {
+      background: white;
+      border-radius: 1rem;
+      padding: 2rem;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      margin-bottom: 2rem;
+    }
+    
+    .quantity-selector {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin: 1rem 0;
+    }
+    
+    .quantity-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 2px solid #10b981;
+      background: white;
+      color: #10b981;
+      font-size: 1.25rem;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .quantity-btn:hover {
+      background: #10b981;
+      color: white;
+    }
+    
+    .quantity-display {
+      font-size: 1.5rem;
+      font-weight: 600;
+      min-width: 60px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+
+  <div class="container my-5">
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
+        <!-- Food Preview -->
+        <div class="food-preview">
+          <h2 class="mb-4">
+            <i class="fas fa-utensils text-success me-2"></i>
+            <span id="food-name">Loading...</span>
+          </h2>
+          
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <p><strong><i class="fas fa-weight-hanging text-success me-2"></i>Available Quantity:</strong> <span id="available-quantity">-</span></p>
+              <p><strong><i class="fas fa-star text-warning me-2"></i>Quality:</strong> <span id="food-quality">-</span></p>
+              <p><strong><i class="fas fa-calendar text-info me-2"></i>Expires:</strong> <span id="expiry-date">-</span></p>
+            </div>
+            <div class="col-md-6">
+              <p><strong><i class="fas fa-map-marker-alt text-danger me-2"></i>Pickup Location:</strong> <span id="pickup-location">-</span></p>
+              <p><strong><i class="fas fa-user text-primary me-2"></i>Donor:</strong> <span id="donor-name">-</span></p>
+            </div>
+          </div>
+          
+          <div id="food-notes" class="alert alert-info d-none">
+            <strong><i class="fas fa-info-circle me-2"></i>Notes:</strong>
+            <span id="notes-content"></span>
+          </div>
+        </div>
+
+        <!-- Request Form -->
+        <div class="form-card">
+          <div class="form-card-header">
+            <h3><i class="fas fa-hand-holding-heart text-success me-2"></i>Request This Food</h3>
+            <p>Fill in the details below to request this donation</p>
+          </div>
+
+          <form id="request-form">
+            <div id="message-container"></div>
+
+            <!-- Quantity Selection -->
+            <div class="mb-4">
+              <label class="form-label fw-semibold">
+                <i class="fas fa-calculator text-success me-2"></i>How much do you need?
+              </label>
+              <div class="quantity-selector">
+                <button type="button" class="quantity-btn" id="decrease-btn">
+                  <i class="fas fa-minus"></i>
+                </button>
+                <div class="quantity-display" id="quantity-display">1</div>
+                <button type="button" class="quantity-btn" id="increase-btn">
+                  <i class="fas fa-plus"></i>
+                </button>
+                <span class="text-muted ms-3">servings/portions</span>
+              </div>
+              <small class="text-muted">Maximum available: <span id="max-quantity">-</span></small>
+            </div>
+
+            <!-- Special Requirements -->
+            <div class="mb-4">
+              <label for="special-requirements" class="form-label fw-semibold">
+                <i class="fas fa-clipboard-list text-success me-2"></i>Special Requirements (Optional)
+              </label>
+              <textarea 
+                class="form-control" 
+                id="special-requirements" 
+                rows="3"
+                placeholder="Any dietary restrictions, allergies, or special requests..."></textarea>
+              <small class="text-muted">Example: No nuts, vegetarian only, extra spicy, etc.</small>
+            </div>
+
+            <!-- Pickup Time -->
+            <div class="mb-4">
+              <label for="pickup-time" class="form-label fw-semibold">
+                <i class="fas fa-clock text-success me-2"></i>Preferred Pickup/Delivery Time
+              </label>
+              <input 
+                type="datetime-local" 
+                class="form-control" 
+                id="pickup-time"
+                required>
+              <small class="text-muted">When would you like to receive the food?</small>
+            </div>
+
+            <!-- Delivery Method -->
+            <div class="mb-4">
+              <label class="form-label fw-semibold">
+                <i class="fas fa-truck text-success me-2"></i>Delivery Method
+              </label>
+              <div class="row g-3">
+                <div class="col-md-6">
+                  <div class="form-check card p-3">
+                    <input class="form-check-input" type="radio" name="delivery-method" id="pickup" value="Pickup by Recipient" checked>
+                    <label class="form-check-label" for="pickup">
+                      <strong><i class="fas fa-walking me-2"></i>I'll Pick Up</strong>
+                      <p class="text-muted small mb-0">I will come to collect the food</p>
+                    </label>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="form-check card p-3">
+                    <input class="form-check-input" type="radio" name="delivery-method" id="delivery" value="Delivery by Donor">
+                    <label class="form-check-label" for="delivery">
+                      <strong><i class="fas fa-shipping-fast me-2"></i>Request Delivery</strong>
+                      <p class="text-muted small mb-0">Ask donor to deliver (if possible)</p>
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Delivery Address (shown if delivery selected) -->
+            <div class="mb-4 d-none" id="delivery-address-section">
+              <label for="delivery-address" class="form-label fw-semibold">
+                <i class="fas fa-map-marked-alt text-success me-2"></i>Delivery Address
+              </label>
+              <textarea 
+                class="form-control" 
+                id="delivery-address" 
+                rows="2"
+                placeholder="Enter your full delivery address..."></textarea>
+            </div>
+
+            <!-- Your Location (for tracking) -->
+            <div class="mb-4">
+              <label class="form-label fw-semibold">
+                <i class="fas fa-location-arrow text-success me-2"></i>Your Location
+              </label>
+              <button type="button" class="btn btn-outline-success" id="get-location-btn">
+                <i class="fas fa-crosshairs me-2"></i>Use My Current Location
+              </button>
+              <small class="text-muted d-block mt-2">This helps with delivery tracking and distance calculation</small>
+              <div id="location-status" class="mt-2"></div>
+            </div>
+
+            <!-- Additional Notes -->
+            <div class="mb-4">
+              <label for="additional-notes" class="form-label fw-semibold">
+                <i class="fas fa-comment text-success me-2"></i>Additional Notes (Optional)
+              </label>
+              <textarea 
+                class="form-control" 
+                id="additional-notes" 
+                rows="2"
+                placeholder="Any other information for the donor..."></textarea>
+            </div>
+
+            <!-- Submit Buttons -->
+            <div class="d-grid gap-2 d-md-flex justify-content-md-between">
+              <button type="button" class="btn btn-outline-secondary" onclick="history.back()">
+                <i class="fas fa-arrow-left me-2"></i>Back
+              </button>
+              <button type="submit" class="btn btn-primary btn-lg">
+                <i class="fas fa-paper-plane me-2"></i>Send Request
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="config.js"></script>
+  <script src="nav.js"></script>
+  <script>
+    // Ensure API_BASE_URL
+    if (typeof window.API_BASE_URL === 'undefined') {
+      window.API_BASE_URL = 'http://localhost:5000';
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const donationId = urlParams.get('id');
+    const token = localStorage.getItem('authToken');
+
+    let donation = null;
+    let currentQuantity = 1;
+    let maxQuantity = 10;
+    let userLocation = null;
+
+    if (!token) {
+      alert('Please login to request food');
+      window.location.href = 'login.html';
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      loadDonationDetails();
+      setupQuantityControls();
+      setupDeliveryMethodToggle();
+      setupLocationButton();
+      setupForm();
+    });
+
+    async function loadDonationDetails() {
+      try {
+        const response = await fetch(`${window.API_BASE_URL}/api/donations/${donationId}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (!response.ok) throw new Error('Failed to load donation');
+
+        donation = await response.json();
+        displayDonation(donation);
+      } catch (error) {
+        console.error('Error:', error);
+        showMessage('Failed to load donation details', 'danger');
+      }
+    }
+
+    function displayDonation(donation) {
+      document.getElementById('food-name').textContent = donation.foodName;
+      document.getElementById('available-quantity').textContent = donation.quantity;
+      document.getElementById('food-quality').textContent = donation.quality || 'Good';
+      document.getElementById('expiry-date').textContent = new Date(donation.expiry).toLocaleDateString();
+      document.getElementById('pickup-location').textContent = donation.pickupLocation || 'Not specified';
+      document.getElementById('donor-name').textContent = donation.donor?.firstName || 'Anonymous';
+      document.getElementById('max-quantity').textContent = donation.quantity;
+
+      // Parse quantity to set max
+      const qtyMatch = donation.quantity.match(/\d+/);
+      if (qtyMatch) {
+        maxQuantity = parseInt(qtyMatch[0]);
+      }
+
+      if (donation.notes) {
+        document.getElementById('food-notes').classList.remove('d-none');
+        document.getElementById('notes-content').textContent = donation.notes;
+      }
+    }
+
+    function setupQuantityControls() {
+      document.getElementById('decrease-btn').addEventListener('click', () => {
+        if (currentQuantity > 1) {
+          currentQuantity--;
+          updateQuantityDisplay();
+        }
+      });
+
+      document.getElementById('increase-btn').addEventListener('click', () => {
+        if (currentQuantity < maxQuantity) {
+          currentQuantity++;
+          updateQuantityDisplay();
+        }
+      });
+    }
+
+    function updateQuantityDisplay() {
+      document.getElementById('quantity-display').textContent = currentQuantity;
+    }
+
+    function setupDeliveryMethodToggle() {
+      document.querySelectorAll('input[name="delivery-method"]').forEach(radio => {
+        radio.addEventListener('change', (e) => {
+          const deliverySection = document.getElementById('delivery-address-section');
+          if (e.target.value === 'Delivery by Donor') {
+            deliverySection.classList.remove('d-none');
+          } else {
+            deliverySection.classList.add('d-none');
+          }
+        });
+      });
+    }
+
+    function setupLocationButton() {
+      document.getElementById('get-location-btn').addEventListener('click', () => {
+        if (navigator.geolocation) {
+          document.getElementById('location-status').innerHTML = '<div class="spinner-border spinner-border-sm text-success"></div> Getting location...';
+          
+          navigator.geolocation.getCurrentPosition(
+            (position) => {
+              userLocation = {
+                latitude: position.coords.latitude,
+                longitude: position.coords.longitude
+              };
+              document.getElementById('location-status').innerHTML = 
+                '<div class="alert alert-success py-2 mb-0"><i class="fas fa-check-circle me-2"></i>Location captured successfully!</div>';
+            },
+            (error) => {
+              document.getElementById('location-status').innerHTML = 
+                '<div class="alert alert-danger py-2 mb-0"><i class="fas fa-exclamation-triangle me-2"></i>Could not get location. Please enable location services.</div>';
+            }
+          );
+        } else {
+          alert('Geolocation is not supported by your browser');
+        }
+      });
+    }
+
+    function setupForm() {
+      document.getElementById('request-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        await submitRequest();
+      });
+    }
+
+    async function submitRequest() {
+      const deliveryMethod = document.querySelector('input[name="delivery-method"]:checked').value;
+      const requestData = {
+        requestedQuantity: `${currentQuantity} servings`,
+        specialRequirements: document.getElementById('special-requirements').value,
+        pickupTime: document.getElementById('pickup-time').value,
+        deliveryMethod: deliveryMethod,
+        deliveryAddress: deliveryMethod === 'Delivery by Donor' ? document.getElementById('delivery-address').value : null,
+        recipientLocation: userLocation ? {
+          type: 'Point',
+          coordinates: [userLocation.longitude, userLocation.latitude]
+        } : null,
+        additionalNotes: document.getElementById('additional-notes').value
+      };
+
+      try {
+        const response = await fetch(`${window.API_BASE_URL}/api/requests/claim/${donationId}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(requestData)
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          showMessage('Request sent successfully! The donor will review your request.', 'success');
+          setTimeout(() => {
+            window.location.href = 'dashboard.html';
+          }, 2000);
+        } else {
+          showMessage(data.message || 'Failed to send request', 'danger');
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        showMessage('An error occurred. Please try again.', 'danger');
+      }
+    }
+
+    function showMessage(message, type) {
+      const container = document.getElementById('message-container');
+      container.innerHTML = `<div class="alert alert-${type} alert-dismissible fade show" role="alert">
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>`;
+    }
+  </script>
+</body>
+</html>

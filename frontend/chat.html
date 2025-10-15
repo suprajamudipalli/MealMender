@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat · MealMender</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="css/modern-style.css">
+  <style>
+    .chat-container {
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    
+    .chat-header {
+      background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+      color: white;
+      padding: 1.5rem;
+      border-radius: 1rem 1rem 0 0;
+    }
+    
+    .chat-messages {
+      height: 500px;
+      overflow-y: auto;
+      padding: 1.5rem;
+      background: #f9fafb;
+      border-left: 1px solid #e5e7eb;
+      border-right: 1px solid #e5e7eb;
+    }
+    
+    .message {
+      margin-bottom: 1rem;
+      display: flex;
+      align-items: flex-start;
+      animation: slideIn 0.3s ease-out;
+    }
+    
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    .message.sent {
+      flex-direction: row-reverse;
+    }
+    
+    .message-avatar {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #10b981;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+    
+    .message.sent .message-avatar {
+      background: #3b82f6;
+    }
+    
+    .message-content {
+      max-width: 70%;
+      margin: 0 1rem;
+    }
+    
+    .message-bubble {
+      background: white;
+      padding: 0.75rem 1rem;
+      border-radius: 1rem;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+      word-wrap: break-word;
+    }
+    
+    .message.sent .message-bubble {
+      background: #10b981;
+      color: white;
+    }
+    
+    .message-time {
+      font-size: 0.75rem;
+      color: #9ca3af;
+      margin-top: 0.25rem;
+    }
+    
+    .message.sent .message-time {
+      text-align: right;
+    }
+    
+    .chat-input-container {
+      background: white;
+      padding: 1.5rem;
+      border: 1px solid #e5e7eb;
+      border-radius: 0 0 1rem 1rem;
+    }
+    
+    .chat-input {
+      border: 2px solid #e5e7eb;
+      border-radius: 50px;
+      padding: 0.75rem 1.5rem;
+      font-size: 0.9375rem;
+    }
+    
+    .chat-input:focus {
+      border-color: #10b981;
+      box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+    }
+    
+    .send-btn {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: #10b981;
+      border: none;
+      color: white;
+      font-size: 1.25rem;
+      cursor: pointer;
+      transition: all 0.3s;
+    }
+    
+    .send-btn:hover {
+      background: #059669;
+      transform: scale(1.05);
+    }
+    
+    .typing-indicator {
+      display: none;
+      padding: 0.5rem 1rem;
+      color: #6b7280;
+      font-style: italic;
+    }
+    
+    .typing-indicator.active {
+      display: block;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+
+  <div class="container my-5">
+    <div class="chat-container">
+      <!-- Chat Header -->
+      <div class="chat-header">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h4 class="mb-1">
+              <i class="fas fa-comments me-2"></i>
+              <span id="chat-with-name">Chat</span>
+            </h4>
+            <small id="food-item-name">Loading...</small>
+          </div>
+          <div>
+            <button class="btn btn-light btn-sm" onclick="window.location.href='track_delivery.html?id=' + requestId">
+              <i class="fas fa-map-marked-alt me-2"></i>Track
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Chat Messages -->
+      <div class="chat-messages" id="chat-messages">
+        <div class="text-center text-muted py-5">
+          <i class="fas fa-comments fa-3x mb-3"></i>
+          <p>Start the conversation!</p>
+        </div>
+      </div>
+      
+      <!-- Typing Indicator -->
+      <div class="typing-indicator" id="typing-indicator">
+        <i class="fas fa-ellipsis-h"></i> Typing...
+      </div>
+      
+      <!-- Chat Input -->
+      <div class="chat-input-container">
+        <form id="chat-form" class="d-flex gap-2">
+          <input 
+            type="text" 
+            class="form-control chat-input" 
+            id="message-input"
+            placeholder="Type your message..."
+            required
+            autocomplete="off">
+          <button type="submit" class="send-btn">
+            <i class="fas fa-paper-plane"></i>
+          </button>
+        </form>
+        <small class="text-muted d-block mt-2">
+          <i class="fas fa-info-circle me-1"></i>
+          Discuss pickup time, delivery method, and any special instructions
+        </small>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="config.js"></script>
+  <script src="nav.js"></script>
+  <script>
+    if (typeof window.API_BASE_URL === 'undefined') {
+      window.API_BASE_URL = 'http://localhost:5000';
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const requestId = urlParams.get('requestId');
+    const token = localStorage.getItem('authToken');
+    
+    let currentUser = null;
+    let requestData = null;
+    let messages = [];
+    let refreshInterval = null;
+
+    if (!token) {
+      alert('Please login to chat');
+      window.location.href = 'login.html';
+    }
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      await loadCurrentUser();
+      await loadRequestDetails();
+      await loadMessages();
+      setupForm();
+      startAutoRefresh();
+    });
+
+    async function loadCurrentUser() {
+      try {
+        const response = await fetch(`${window.API_BASE_URL}/api/profile/me`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (response.ok) {
+          currentUser = await response.json();
+        }
+      } catch (error) {
+        console.error('Error loading user:', error);
+      }
+    }
+
+    async function loadRequestDetails() {
+      try {
+        const response = await fetch(`${window.API_BASE_URL}/api/requests/${requestId}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (response.ok) {
+          requestData = await response.json();
+          updateChatHeader(requestData);
+        }
+      } catch (error) {
+        console.error('Error loading request:', error);
+      }
+    }
+
+    function updateChatHeader(request) {
+      const isDonor = currentUser && currentUser._id === request.donor?._id;
+      const otherPerson = isDonor ? request.recipient : request.donor;
+      
+      document.getElementById('chat-with-name').textContent = 
+        `Chat with ${otherPerson?.firstName || 'User'}`;
+      document.getElementById('food-item-name').textContent = 
+        `About: ${request.donation?.foodName || 'Food Item'}`;
+    }
+
+    async function loadMessages() {
+      try {
+        const response = await fetch(`${window.API_BASE_URL}/api/messages/${requestId}`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+
+        if (response.ok) {
+          messages = await response.json();
+          displayMessages(messages);
+        }
+      } catch (error) {
+        console.error('Error loading messages:', error);
+      }
+    }
+
+    function displayMessages(messages) {
+      const container = document.getElementById('chat-messages');
+      
+      if (messages.length === 0) {
+        container.innerHTML = `
+          <div class="text-center text-muted py-5">
+            <i class="fas fa-comments fa-3x mb-3"></i>
+            <p>No messages yet. Start the conversation!</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = '';
+      messages.forEach(msg => {
+        const isSent = msg.sender._id === currentUser._id;
+        const messageEl = createMessageElement(msg, isSent);
+        container.appendChild(messageEl);
+      });
+
+      // Scroll to bottom
+      container.scrollTop = container.scrollHeight;
+    }
+
+    function createMessageElement(msg, isSent) {
+      const div = document.createElement('div');
+      div.className = `message ${isSent ? 'sent' : 'received'}`;
+      
+      const initials = msg.sender.firstName?.charAt(0) || 'U';
+      const time = new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      
+      div.innerHTML = `
+        <div class="message-avatar">${initials}</div>
+        <div class="message-content">
+          <div class="message-bubble">
+            ${escapeHtml(msg.content)}
+          </div>
+          <div class="message-time">${time}</div>
+        </div>
+      `;
+      
+      return div;
+    }
+
+    function setupForm() {
+      document.getElementById('chat-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        await sendMessage();
+      });
+
+      // Optional: Show typing indicator
+      document.getElementById('message-input').addEventListener('input', () => {
+        // Could implement typing indicator here
+      });
+    }
+
+    async function sendMessage() {
+      const input = document.getElementById('message-input');
+      const content = input.value.trim();
+
+      if (!content) return;
+
+      try {
+        const response = await fetch(`${window.API_BASE_URL}/api/messages`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            requestId: requestId,
+            content: content
+          })
+        });
+
+        if (response.ok) {
+          input.value = '';
+          await loadMessages();
+        } else {
+          alert('Failed to send message');
+        }
+      } catch (error) {
+        console.error('Error sending message:', error);
+        alert('An error occurred');
+      }
+    }
+
+    function startAutoRefresh() {
+      // Refresh messages every 3 seconds
+      refreshInterval = setInterval(async () => {
+        await loadMessages();
+      }, 3000);
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    // Clean up interval on page unload
+    window.addEventListener('beforeunload', () => {
+      if (refreshInterval) {
+        clearInterval(refreshInterval);
+      }
+    });
+  </script>
+</body>
+</html>

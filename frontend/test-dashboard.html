@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard Test</title>
+</head>
+<body>
+  <h1>Dashboard Debug</h1>
+  <div id="status">Checking...</div>
+  <div id="details"></div>
+  
+  <script src="config.js"></script>
+  <script>
+    const statusDiv = document.getElementById('status');
+    const detailsDiv = document.getElementById('details');
+    
+    async function testDashboard() {
+      const token = localStorage.getItem('authToken');
+      
+      detailsDiv.innerHTML += `<p>Token exists: ${!!token}</p>`;
+      detailsDiv.innerHTML += `<p>API URL: ${window.API_BASE_URL}</p>`;
+      
+      if (!token) {
+        statusDiv.innerHTML = '❌ No token found. Please login first.';
+        detailsDiv.innerHTML += `<p><a href="login.html">Go to Login</a></p>`;
+        return;
+      }
+      
+      try {
+        statusDiv.innerHTML = 'Testing API connection...';
+        
+        const response = await fetch(`${window.API_BASE_URL}/api/profile/me`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        
+        detailsDiv.innerHTML += `<p>Response status: ${response.status}</p>`;
+        
+        if (!response.ok) {
+          statusDiv.innerHTML = '❌ API call failed';
+          detailsDiv.innerHTML += `<p>Error: ${response.statusText}</p>`;
+          return;
+        }
+        
+        const user = await response.json();
+        statusDiv.innerHTML = '✅ Dashboard should work!';
+        detailsDiv.innerHTML += `<p>User: ${user.firstName} ${user.lastName}</p>`;
+        detailsDiv.innerHTML += `<p>Role: ${user.role}</p>`;
+        detailsDiv.innerHTML += `<p><a href="dashboard.html">Go to Dashboard</a></p>`;
+        
+      } catch (error) {
+        statusDiv.innerHTML = '❌ Error occurred';
+        detailsDiv.innerHTML += `<p>Error: ${error.message}</p>`;
+        console.error('Test error:', error);
+      }
+    }
+    
+    testDashboard();
+  </script>
+</body>
+</html>

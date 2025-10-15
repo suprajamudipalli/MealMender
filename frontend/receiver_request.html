@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Recipient Food Requests - MealMender</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: url('images/bg.jpg') no-repeat center center fixed;
+      background-size: cover;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 600px;
+      margin: 50px auto;
+      background: rgba(255, 255, 255, 0.9);
+      padding: 20px;
+      border-radius: 8px;
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+    }
+    label {
+      margin: 10px 0 5px;
+      font-weight: bold;
+    }
+    select, button {
+      padding: 10px;
+      font-size: 1rem;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
+    button {
+      margin-top: 20px;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #218838;
+    }
+    .message {
+      margin-top: 15px;
+      font-weight: bold;
+      color: green;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Request Food Donation</h1>
+    <form id="requestForm">
+      <label for="foodSelect">Select Food Donation:</label>
+      <select id="foodSelect" required>
+        <option value="">Loading donations...</option>
+      </select>
+      <button type="submit">Send Request</button>
+    </form>
+    <div id="message" class="message"></div>
+  </div>
+
+  <script src="config.js"></script>
+  <script>
+    const token = localStorage.getItem('token');
+    const foodSelect = document.getElementById('foodSelect');
+    const messageDiv = document.getElementById('message');
+    const requestForm = document.getElementById('requestForm');
+
+    // Fetch available donations
+    async function fetchDonations() {
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/donor`, {
+          headers: { Authorization: 'Bearer ' + token }
+        });
+        if (!response.ok) throw new Error('Failed to fetch donations');
+        const donations = await response.json();
+        foodSelect.innerHTML = '<option value="">Select a donation</option>';
+        donations.forEach(donation => {
+          const option = document.createElement('option');
+          option.value = donation._id;
+          option.textContent = `${donation.foodName} - ${donation.quantity}`;
+          foodSelect.appendChild(option);
+        });
+      } catch (error) {
+        foodSelect.innerHTML = '<option value="">Error loading donations</option>';
+      }
+    }
+
+    // Submit request
+    requestForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      messageDiv.textContent = '';
+      const foodId = foodSelect.value;
+      if (!foodId) {
+        messageDiv.textContent = 'Please select a food donation.';
+        messageDiv.classList.add('error');
+        return;
+      }
+      try {
+        const response = await fetch(`${API_BASE_URL}/api/receiver/request`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: 'Bearer ' + token
+          },
+          body: JSON.stringify({ foodId })
+        });
+        const data = await response.json();
+        if (response.ok) {
+          messageDiv.textContent = data.msg || 'Request sent successfully!';
+          messageDiv.classList.remove('error');
+        } else {
+          messageDiv.textContent = data.msg || 'Failed to send request.';
+          messageDiv.classList.add('error');
+        }
+      } catch (error) {
+        messageDiv.textContent = 'Server error. Please try again later.';
+        messageDiv.classList.add('error');
+      }
+    });
+
+    fetchDonations();
+  </script>
+</body>
+</html>

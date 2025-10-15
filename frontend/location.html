@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Location - MEALMENDER</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header>
+    <h1>Location Services</h1>
+  </header>
+
+  <main>
+    <button onclick="getLocation()">Get My Location</button>
+    <p id="locationOutput"></p>
+  </main>
+
+  <script>
+    function getLocation() {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(pos => {
+          document.getElementById("locationOutput").innerText = 
+            `Latitude: ${pos.coords.latitude}, Longitude: ${pos.coords.longitude}`;
+        });
+      } else {
+        document.getElementById("locationOutput").innerText = "Geolocation not supported.";
+      }
+    }
+  </script>
+</body>
+</html>

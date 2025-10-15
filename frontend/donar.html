@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MealMender · Donor Panel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --mm-bg-1:#e9f9ee;
+      --mm-bg-2:#ffffff;
+      --mm-header:#a5d6a7;
+      --mm-ink:#1b5e20;
+      --mm-accent:#81c784;
+      --mm-accent-strong:#66bb6a;
+      --mm-ink-soft:#2e7d32;
+      --radius-xl:20px;
+      --radius-lg:16px;
+      --shadow-1:0 6px 18px rgba(0,0,0,.08);
+      --shadow-2:0 12px 28px rgba(0,0,0,.12);
+      --ring:0 0 0 4px rgba(129,199,132,.25);
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(180deg, var(--mm-bg-1), var(--mm-bg-2));
+      color: #2e2e2e;
+    }
+
+    header {
+      background: var(--mm-header);
+      padding: 16px 22px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-radius: 0 0 var(--radius-xl) var(--radius-xl);
+      box-shadow: var(--shadow-1);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: .65rem;
+      font-weight: 700;
+    }
+    .brand span { font-size: 1.25rem; color: var(--mm-ink); }
+
+    .container {
+      max-width: 1100px;
+      margin: 30px auto;
+      padding: 0 18px;
+    }
+
+    h1 {
+      color: var(--mm-ink-soft);
+      font-size: 1.6rem;
+      margin-bottom: 20px;
+    }
+
+    .donor-types {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 18px;
+    }
+
+    .donor-card {
+      background: #fff;
+      padding: 18px;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-1);
+      transition: transform .2s ease, box-shadow .2s ease;
+    }
+    .donor-card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-2);
+    }
+
+    .donor-card h3 {
+      margin: 0 0 8px;
+      font-size: 1.1rem;
+      color: var(--mm-ink);
+    }
+
+    .donor-card p {
+      font-size: .92rem;
+      margin: 0 0 12px;
+      opacity: .9;
+    }
+
+    .btn {
+      padding: 8px 14px;
+      border: none;
+      border-radius: 999px;
+      cursor: pointer;
+      font-size: .9rem;
+      transition: .2s ease;
+    }
+    .btn.filled {
+      background: var(--mm-accent);
+      color: white;
+    }
+    .btn.filled:hover {
+      background: var(--mm-accent-strong);
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <div class="logo">🍱</div>
+      <span>MealMender</span>
+    </div>
+    <nav>
+      <!-- 🔹 Back now goes to main admin page -->
+      <a href="admin.html" class="btn filled">Back</a>
+    </nav>
+  </header>
+
+  <main class="container">
+    <h1>Choose Your Donor Type</h1>
+    <div class="donor-types">
+      <div class="donor-card">
+        <h3>👤 Individual</h3>
+        <p>People with extra home-cooked meals or packaged food they wish to share.</p>
+        <button class="btn filled" onclick="location.href='donation.html'">Donate</button>
+      </div>
+
+      <div class="donor-card">
+        <h3>🍽️ Restaurants & Cafes</h3>
+        <p>Food businesses that have surplus meals at the end of the day.</p>
+        <button class="btn filled" onclick="location.href='donation.html'">Donate</button>
+      </div>
+
+      <div class="donor-card">
+        <h3>🛒 Grocery Stores / Supermarkets</h3>
+        <p>Stores with unsold but fresh and safe groceries for redistribution.</p>
+        <button class="btn filled" onclick="location.href='donation.html'">Donate</button>
+      </div>
+
+      <div class="donor-card">
+        <h3>🏢 Community Organizations</h3>
+        <p>Groups and NGOs that organize food drives or community meals.</p>
+        <button class="btn filled" onclick="location.href='donation.html'">Donate</button>
+      </div>
+
+      <div class="donor-card">
+        <h3>👨‍🍳 Caterers & 🎉 Event Planners</h3>
+        <p>Event caterers, wedding planners, and organizers who often have large quantities of leftover food after functions.</p>
+        <button class="btn filled" onclick="location.href='donation.html'">Donate</button>
+      </div>
+
+      <!-- 🆕 Extra donor examples -->
+      <div class="donor-card">
+        <h3>🏫 Schools & Colleges</h3>
+        <p>Institutions with canteens or mess halls that prepare extra meals daily.</p>
+        <button class="btn filled" onclick="location.href='donation.html'">Donate</button>
+      </div>
+
+      <div class="donor-card">
+        <h3>🏥 Hospitals</h3>
+        <p>Hospital canteens and medical centers with surplus meals and groceries.</p>
+        <button class="btn filled" onclick="location.href='donation.html'">Donate</button>
+      </div>
+
+      <div class="donor-card">
+        <h3>🏭 Corporate Offices</h3>
+        <p>Companies with cafeterias offering leftover meals after work hours.</p>
+        <button class="btn filled" onclick="location.href='donation.html'">Donate</button>
+      </div>
+
+      <div class="donor-card">
+        <h3>🚚 Delivery Partners</h3>
+        <p>Cancelled or unclaimed food orders collected by delivery executives.</p>
+        <button class="btn filled" onclick="location.href='donar.html'">Donate</button>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Login - MealMender</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="bg-light">
+
+  <!-- Navbar will be injected here -->
+
+  <div class="container my-5">
+    <div class="row justify-content-center">
+      <div class="col-md-6 col-lg-4">
+        <div class="card shadow-sm">
+          <div class="card-body p-4">
+            <h2 class="card-title text-center mb-1">Welcome Back!</h2>
+            <p class="text-center text-muted mb-4">Log in to continue to MealMender.</p>
+            
+            <!-- Login Form -->
+            <form id="loginForm">
+              <!-- Error Message Placeholder -->
+              <div id="loginMessage" class="alert alert-danger d-none" role="alert"></div>
+
+              <div class="mb-3">
+                <label for="username" class="form-label">Username or Email</label>
+                <input type="text" class="form-control" id="username" required>
+              </div>
+              <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" class="form-control" id="password" required>
+              </div>
+              <button type="submit" class="btn btn-success w-100">Login</button>
+            </form>
+            
+            <div class="text-center mt-3">
+              <p>Don't have an account? <a href="signup.html">Sign Up</a></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- App Config -->
+  <script src="config.js"></script>
+  <!-- Dynamic Navbar & Footer -->
+  <script src="nav.js"></script>
+  <script src="footer.js"></script>
+  <!-- Login Logic -->
+  <script src="login.js"></script>
+</body>
+</html>

@@ -1,0 +1,110 @@
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MealMender · Donation Form</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Leaflet CSS for map -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="bg-light">
+  <!-- Navbar will be injected here -->
+
+  <div class="container my-5">
+    <div class="row justify-content-center">
+      <div class="col-lg-8">
+        <div class="card shadow-sm">
+          <div class="card-body p-4">
+            <h2 class="card-title text-center text-success mb-4">Create a New Donation</h2>
+            <form id="donation-form">
+              <!-- Message Placeholder -->
+              <div id="message-container" class="mb-3"></div>
+
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label for="foodName" class="form-label">Food Name / Title</label>
+                  <input type="text" class="form-control" id="foodName" placeholder="e.g. Vegetable Biryani" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label for="quantity" class="form-label">Quantity</label>
+                  <input type="text" class="form-control" id="quantity" placeholder="e.g. 20 meals, 5 kg" required>
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label for="quality" class="form-label">Quality</label>
+                  <select id="quality" class="form-select" required>
+                    <option value="">-- Select --</option>
+                    <option value="Fresh">Fresh</option>
+                    <option value="Good">Good (Near Expiry)</option>
+                    <option value="Packaged">Packaged (Non-Perishable)</option>
+                  </select>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label for="type" class="form-label">Type of Food</label>
+                  <select id="type" class="form-select" required>
+                    <option value="">-- Select --</option>
+                    <option value="Veg">Vegetarian</option>
+                    <option value="Non-Veg">Non-Vegetarian</option>
+                    <option value="Both">Contains Veg & Non-Veg</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label for="expiry" class="form-label">Expiry Date / Best Before</label>
+                <input type="date" class="form-control" id="expiry" required>
+              </div>
+
+              <div class="mb-3">
+                <label for="notes" class="form-label">Additional Notes (Optional)</label>
+                <textarea id="notes" class="form-control" rows="3" placeholder="Any special instructions (e.g., handle with care, contains peanuts, etc.)"></textarea>
+              </div>
+
+              <hr class="my-4">
+
+              <h5 class="text-success mb-3">Pickup Details</h5>
+              <div class="mb-3">
+                <label for="pickup-address" class="form-label">Pickup Location Address</label>
+                <div class="input-group">
+                  <input type="text" class="form-control" id="pickup-address" placeholder="Enter address or use location services" required>
+                  <button class="btn btn-outline-secondary" type="button" id="get-location-btn" title="Use my current location">📍</button>
+                  <button class="btn btn-outline-secondary" type="button" id="toggle-map-btn" title="Select on map">🗺️</button>
+                </div>
+                <p id="location-status" class="form-text mt-1"></p>
+                <!-- Hidden fields for lat/lon -->
+                <input type="hidden" id="pickup-lat">
+                <input type="hidden" id="pickup-lon">
+              </div>
+
+              <!-- Map for location selection -->
+              <div id="map" class="mb-3" style="height: 300px; width: 100%; border-radius: 8px; display: none;"></div>
+
+              <div class="d-grid">
+                <button class="btn btn-success btn-lg" type="submit">Submit Donation</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Leaflet JS for map -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- App Config -->
+  <script src="config.js"></script>
+  <!-- Dynamic Navbar & Footer -->
+  <script src="nav.js"></script>
+  <script src="footer.js"></script>
+  <!-- Donation Logic -->
+  <script src="donation.js"></script>
+</body>
+</html>

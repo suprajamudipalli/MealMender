@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MealMender - Sign Up</title>
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Custom CSS (optional) -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body class="bg-light">
+
+  <!-- Navbar will be injected here -->
+
+  <div class="container my-5">
+    <div class="row justify-content-center">
+      <div class="col-md-8 col-lg-6">
+        <div class="card shadow-sm">
+          <div class="card-body p-4">
+            <h2 class="card-title text-center mb-1">Join MealMender</h2>
+            <p class="text-center text-muted mb-4">Create an account to start donating or receiving food.</p>
+            
+            <form id="signup-form">
+              <!-- Message Placeholder -->
+              <div id="message-container" class="mb-3"></div>
+
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label for="firstName" class="form-label">First Name</label>
+                  <input type="text" class="form-control" id="firstName" required>
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label for="lastName" class="form-label">Last Name</label>
+                  <input type="text" class="form-control" id="lastName" required>
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label for="username" class="form-label">Username</label>
+                <input type="text" class="form-control" id="username" required>
+              </div>
+
+              <div class="mb-3">
+                <label for="email" class="form-label">Email address</label>
+                <input type="email" class="form-control" id="email" required>
+              </div>
+
+              <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" class="form-control" id="password" required>
+              </div>
+
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label for="dob" class="form-label">Date of Birth (Optional)</label>
+                  <input type="date" class="form-control" id="dob">
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label for="gender" class="form-label">Gender (Optional)</label>
+                  <select class="form-control" id="gender">
+                    <option value="">Select...</option>
+                    <option value="male">Male</option>
+                    <option value="female">Female</option>
+                    <option value="other">Other</option>
+                    <option value="prefer-not-to-say">Prefer not to say</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label for="role" class="form-label">I want to <span class="text-danger">*</span></label>
+                <select class="form-control" id="role" required>
+                  <option value="">Select your role...</option>
+                  <option value="donor">🎁 Donate Food - Share surplus meals</option>
+                  <option value="recipient">🍽️ Receive Food - Get meals in need</option>
+                </select>
+                <small class="text-muted">You can change this later in your profile</small>
+              </div>
+
+              <button type="submit" class="btn btn-success w-100">Sign Up</button>
+            </form>
+            
+            <div class="text-center mt-3">
+              <p>Already have an account? <a href="login.html">Login</a></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- App Config -->
+  <script src="config.js"></script>
+  <!-- Dynamic Navbar & Footer -->
+  <script src="nav.js"></script>
+  <script src="footer.js"></script>
+  <!-- Signup Logic -->
+  <script src="signup.js"></script>
+</body>
+</html>

@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MealMender · Donor Requests</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f4f9f4;
+      padding: 20px;
+    }
+
+    header {
+      background: #81c784;
+      color: white;
+      padding: 15px;
+      font-size: 1.2rem;
+      font-weight: bold;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    header button {
+      background: white;
+      color: #388e3c;
+      border: none;
+      padding: 6px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+
+    h2 {
+      margin-top: 20px;
+      color: #333;
+    }
+
+    .request-card {
+      background: white;
+      padding: 15px;
+      margin: 15px 0;
+      border-radius: 10px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .request-card h3 {
+      margin: 0;
+      color: #2e7d32;
+    }
+
+    .request-card p {
+      margin: 5px 0;
+      color: #555;
+    }
+
+    .actions {
+      margin-top: 10px;
+    }
+
+    .accept-btn, .reject-btn {
+      padding: 8px 14px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      margin-right: 10px;
+    }
+
+    .accept-btn {
+      background: #66bb6a;
+      color: white;
+    }
+
+    .reject-btn {
+      background: #ef5350;
+      color: white;
+    }
+
+    .accept-btn:hover {
+      background: #4caf50;
+    }
+
+    .reject-btn:hover {
+      background: #d32f2f;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <span>📥 MealMender – Donor Requests</span>
+    <button onclick="window.location.href='admin.html'">⬅ Back</button>
+  </header>
+
+  <h2>Pending Food Requests</h2>
+
+  <div class="request-card">
+    <h3>🍛 Veg Biryani & Curry</h3>
+    <p><strong>Requested By:</strong> Ramesh (Near Leela Mahal Center)</p>
+    <p><strong>Quantity:</strong> 2 plates</p>
+    <div class="actions">
+      <button class="accept-btn" onclick="window.location.href='chat.html'">✅ Accept</button>
+      <button class="reject-btn">❌ Reject</button>
+    </div>
+  </div>
+
+  <div class="request-card">
+    <h3>🥗 Vegetable Salad Packs</h3>
+    <p><strong>Requested By:</strong> Lakshmi (Near Kapila Theertham)</p>
+    <p><strong>Quantity:</strong> 3 packs</p>
+    <div class="actions">
+      <button class="accept-btn" onclick="window.location.href='chat.html'">✅ Accept</button>
+      <button class="reject-btn">❌ Reject</button>
+    </div>
+  </div>
+
+  <div class="request-card">
+    <h3>🍲 Sambar Rice</h3>
+    <p><strong>Requested By:</strong> Suresh (Near RTC Bus Stand)</p>
+    <p><strong>Quantity:</strong> 1 plate</p>
+    <div class="actions">
+      <button class="accept-btn" onclick="window.location.href='chat.html'">✅ Accept</button>
+      <button class="reject-btn">❌ Reject</button>
+    </div>
+  </div>
+
+</body>
+</html>
