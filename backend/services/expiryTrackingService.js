@@ -139,21 +139,8 @@ class ExpiryTrackingService {
 
       console.log(`📧 Notifying ${donation.donor.username}: ${message}`);
 
-      // Send email notification
-      const emailSent = await emailService.sendExpiryWarning(
-        donation.donor,
-        donation,
-        hoursLeft,
-        minutesLeft,
-        hasRequests,
-        requestCount
-      );
-
-      if (emailSent) {
-        console.log(`✅ Email notification sent successfully to ${donation.donor.email}`);
-      } else {
-        console.log(`⚠️ Email notification failed (service may not be configured)`);
-      }
+      // Email notifications disabled - only logging
+      console.log(`📧 [DISABLED] Would send email notification to ${donation.donor.email}: ${message}`);
 
       // You can also extend this to:
       // 1. Send push notifications
