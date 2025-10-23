@@ -152,7 +152,7 @@ async function loadRecipientDashboard(user, token) {
   const actionsSection = document.getElementById('actions-section');
   actionsSection.innerHTML = `
     <div class="col-md-4">
-      <div class="action-card" onclick="window.location.href='receiver.html'">
+      <div class="action-card" onclick="window.location.href='receiver_improved.html'">
         <i class="fas fa-search"></i>
         <h3>Browse Available Food</h3>
         <p class="text-muted">Discover fresh meals and groceries available near you</p>
@@ -177,10 +177,8 @@ async function loadRecipientDashboard(user, token) {
     </div>
   `;
 
-  // Show recent activity
-  if (myRequests.length > 0) {
-    showRecentActivity(myRequests.slice(0, 5));
-  }
+  // Show notifications & requests section
+  showRecipientNotifications(myRequests);
 }
 
 // ============= DONOR DASHBOARD =============
@@ -298,6 +296,9 @@ async function loadDonorDashboard(user, token) {
   if (myDonations.length > 0) {
     showRecentDonations(myDonations.slice(0, 5));
   }
+
+  // Show donor notifications
+  showDonorNotifications(requests);
 }
 
 // ============= ADMIN DASHBOARD =============
@@ -420,6 +421,282 @@ async function setUserRole(role) {
     }
   } catch (error) {
     console.error('Role update error:', error);
+    alert('An error occurred. Please try again.');
+  }
+}
+
+// ============= NOTIFICATION SECTIONS =============
+function showRecipientNotifications(requests) {
+  const notificationsSection = document.getElementById('notifications-section');
+  if (!notificationsSection) return;
+
+  notificationsSection.classList.remove('d-none');
+  
+  const recentRequests = requests.slice(0, 5);
+  
+  if (recentRequests.length === 0) {
+    notificationsSection.innerHTML = `
+      <div class="col-12">
+        <div class="card">
+          <div class="card-body text-center py-5">
+            <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+            <h5 class="text-muted">No requests yet</h5>
+            <p class="text-muted">Browse available food and make your first request!</p>
+            <a href="receiver_improved.html" class="btn btn-success">Browse Food</a>
+          </div>
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  notificationsSection.innerHTML = `
+    <div class="col-12">
+      <div class="card shadow-sm">
+        <div class="card-header bg-success text-white">
+          <h5 class="mb-0"><i class="fas fa-bell me-2"></i>Your Requests & Notifications</h5>
+        </div>
+        <div class="card-body">
+          ${recentRequests.map(req => {
+            const isApproved = req.status?.toLowerCase() === 'approved' || req.status?.toLowerCase() === 'in transit';
+            return `
+            <div class="notification-item border rounded p-3 mb-3 ${isApproved ? 'bg-light border-success' : ''}">
+              <div class="d-flex justify-content-between align-items-start">
+                <div class="flex-grow-1">
+                  <h6 class="mb-2">
+                    <i class="fas fa-utensils text-success me-2"></i>${req.donation?.foodName || 'Food Item'}
+                  </h6>
+                  <div class="mb-2">
+                    <small class="text-muted d-block">
+                      <i class="fas fa-user me-1"></i><strong>Donor:</strong> ${req.donor?.firstName || 'Anonymous'} ${req.donor?.lastName || ''}
+                    </small>
+                    ${req.requestedQuantity ? `
+                      <small class="text-muted d-block">
+                        <i class="fas fa-calculator me-1"></i><strong>Requested:</strong> ${req.requestedQuantity}
+                      </small>
+                    ` : ''}
+                    ${isApproved && req.donor?.phone ? `
+                      <small class="text-success d-block">
+                        <i class="fas fa-phone me-1"></i><strong>Contact:</strong> ${req.donor.phone}
+                      </small>
+                    ` : ''}
+                    ${req.pickupTime ? `
+                      <small class="text-muted d-block">
+                        <i class="fas fa-clock me-1"></i><strong>Pickup:</strong> ${new Date(req.pickupTime).toLocaleString()}
+                      </small>
+                    ` : ''}
+                  </div>
+                  <div>
+                    <span class="badge bg-${getStatusBadgeColor(req.status)} me-2">${req.status}</span>
+                    ${req.deliveryMethod ? `<span class="badge bg-info">${req.deliveryMethod}</span>` : ''}
+                  </div>
+                </div>
+                <div class="text-end ms-3">
+                  <small class="text-muted d-block mb-2">${new Date(req.createdAt).toLocaleDateString()}</small>
+                  ${getRecipientActionButtons(req)}
+                </div>
+              </div>
+            </div>
+          `;
+          }).join('')}
+          <div class="text-center mt-3">
+            <a href="my_requests.html" class="btn btn-outline-success">
+              <i class="fas fa-list me-2"></i>View All Requests
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function showDonorNotifications(requests) {
+  const notificationsSection = document.getElementById('notifications-section');
+  if (!notificationsSection) return;
+
+  notificationsSection.classList.remove('d-none');
+  
+  const pendingRequests = requests.filter(r => r.status === 'Pending');
+  const recentRequests = requests.slice(0, 5);
+  
+  if (recentRequests.length === 0) {
+    notificationsSection.innerHTML = `
+      <div class="col-12">
+        <div class="card">
+          <div class="card-body text-center py-5">
+            <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+            <h5 class="text-muted">No requests yet</h5>
+            <p class="text-muted">Your donations will appear here when someone requests them!</p>
+          </div>
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  notificationsSection.innerHTML = `
+    <div class="col-12">
+      <div class="card shadow-sm">
+        <div class="card-header bg-success text-white">
+          <h5 class="mb-0">
+            <i class="fas fa-bell me-2"></i>Incoming Requests
+            ${pendingRequests.length > 0 ? `<span class="badge bg-warning ms-2">${pendingRequests.length} Pending</span>` : ''}
+          </h5>
+        </div>
+        <div class="card-body">
+          ${recentRequests.map(req => {
+            const isApproved = req.status?.toLowerCase() === 'approved' || req.status?.toLowerCase() === 'in transit';
+            return `
+            <div class="notification-item border rounded p-3 mb-3 ${isApproved ? 'bg-light border-success' : req.status === 'Pending' ? 'border-warning' : ''}">
+              <div class="d-flex justify-content-between align-items-start">
+                <div class="flex-grow-1">
+                  <h6 class="mb-2">
+                    <i class="fas fa-utensils text-success me-2"></i>${req.donation?.foodName || 'Food Item'}
+                  </h6>
+                  <div class="mb-2">
+                    <small class="text-muted d-block">
+                      <i class="fas fa-user me-1"></i><strong>Recipient:</strong> ${req.recipient?.firstName || 'Anonymous'} ${req.recipient?.lastName || ''}
+                    </small>
+                    ${req.requestedQuantity ? `
+                      <small class="text-muted d-block">
+                        <i class="fas fa-calculator me-1"></i><strong>Requested:</strong> ${req.requestedQuantity}
+                      </small>
+                    ` : ''}
+                    ${isApproved && req.recipient?.phone ? `
+                      <small class="text-success d-block">
+                        <i class="fas fa-phone me-1"></i><strong>Contact:</strong> ${req.recipient.phone}
+                      </small>
+                    ` : ''}
+                    ${req.specialRequirements ? `
+                      <small class="text-muted d-block">
+                        <i class="fas fa-clipboard-list me-1"></i><strong>Special:</strong> ${req.specialRequirements}
+                      </small>
+                    ` : ''}
+                    ${req.pickupTime ? `
+                      <small class="text-muted d-block">
+                        <i class="fas fa-clock me-1"></i><strong>Pickup:</strong> ${new Date(req.pickupTime).toLocaleString()}
+                      </small>
+                    ` : ''}
+                  </div>
+                  <div>
+                    <span class="badge bg-${getStatusBadgeColor(req.status)} me-2">${req.status}</span>
+                    ${req.deliveryMethod ? `<span class="badge bg-info">${req.deliveryMethod}</span>` : ''}
+                  </div>
+                </div>
+                <div class="text-end ms-3">
+                  <small class="text-muted d-block mb-2">${new Date(req.createdAt).toLocaleDateString()}</small>
+                  ${getDonorActionButtons(req)}
+                </div>
+              </div>
+            </div>
+          `;
+          }).join('')}
+          <div class="text-center mt-3">
+            <a href="notifications.html" class="btn btn-outline-success">
+              <i class="fas fa-list me-2"></i>View All Requests
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function getStatusBadgeColor(status) {
+  const statusLower = status?.toLowerCase() || '';
+  const colors = {
+    'pending': 'warning',
+    'approved': 'success',
+    'rejected': 'danger',
+    'in transit': 'info',
+    'delivered': 'primary',
+    'completed': 'success'
+  };
+  return colors[statusLower] || 'secondary';
+}
+
+function getRecipientActionButtons(request) {
+  const status = request.status?.toLowerCase() || '';
+  
+  if (status === 'approved' || status === 'in transit') {
+    return `
+      <div class="btn-group-vertical btn-group-sm">
+        <a href="track_delivery.html?id=${request._id}" class="btn btn-sm btn-success mb-1">
+          <i class="fas fa-map-marker-alt me-1"></i>Track
+        </a>
+        <a href="chat.html?requestId=${request._id}" class="btn btn-sm btn-primary">
+          <i class="fas fa-comment me-1"></i>Chat
+        </a>
+      </div>
+    `;
+  } else if (status === 'pending') {
+    return `<span class="badge bg-warning">Awaiting Approval</span>`;
+  } else if (status === 'delivered') {
+    return `<span class="badge bg-success"><i class="fas fa-check-circle me-1"></i>Completed</span>`;
+  }
+  
+  return '';
+}
+
+function getDonorActionButtons(request) {
+  const status = request.status?.toLowerCase() || '';
+  const token = localStorage.getItem('authToken');
+  
+  if (status === 'pending') {
+    return `
+      <div class="btn-group-vertical btn-group-sm">
+        <button onclick="updateRequestStatus('${request._id}', 'Approved')" class="btn btn-sm btn-success mb-1">
+          <i class="fas fa-check me-1"></i>Approve
+        </button>
+        <button onclick="updateRequestStatus('${request._id}', 'Rejected')" class="btn btn-sm btn-danger">
+          <i class="fas fa-times me-1"></i>Reject
+        </button>
+      </div>
+    `;
+  } else if (status === 'approved' || status === 'in transit') {
+    return `
+      <div class="btn-group-vertical btn-group-sm">
+        <a href="track_delivery.html?id=${request._id}" class="btn btn-sm btn-success mb-1">
+          <i class="fas fa-map-marker-alt me-1"></i>Track
+        </a>
+        <a href="chat.html?requestId=${request._id}" class="btn btn-sm btn-primary">
+          <i class="fas fa-comment me-1"></i>Chat
+        </a>
+      </div>
+    `;
+  } else if (status === 'delivered') {
+    return `<span class="badge bg-success"><i class="fas fa-check-circle me-1"></i>Completed</span>`;
+  }
+  
+  return '';
+}
+
+async function updateRequestStatus(requestId, status) {
+  const token = localStorage.getItem('authToken');
+  
+  if (!confirm(`Are you sure you want to ${status.toLowerCase()} this request?`)) {
+    return;
+  }
+  
+  try {
+    const response = await fetch(`${window.API_BASE_URL}/api/requests/${requestId}/status`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ status })
+    });
+
+    if (response.ok) {
+      alert(`Request ${status.toLowerCase()} successfully!`);
+      window.location.reload();
+    } else {
+      const data = await response.json();
+      alert(data.message || 'Failed to update request status');
+    }
+  } catch (error) {
+    console.error('Error updating request:', error);
     alert('An error occurred. Please try again.');
   }
 }

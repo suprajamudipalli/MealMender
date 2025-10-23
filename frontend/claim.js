@@ -72,7 +72,7 @@ document.addEventListener('DOMContentLoaded', () => {
       if (response.ok) {
         showMessage('Request sent successfully! You will be notified when the donor responds.', 'success');
         claimForm.style.display = 'none'; // Hide form after success
-        setTimeout(() => window.location.href = 'receiver.html', 3000);
+        setTimeout(() => window.location.href = 'receiver_improved.html', 3000);
       } else {
         showMessage(data.message || 'Failed to send request.', 'danger');
       }

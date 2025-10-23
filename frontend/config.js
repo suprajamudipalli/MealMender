@@ -1,15 +1,10 @@
 // Expose API base URL as a global for plain script usage across pages
-// Detect common local dev hosts (localhost, 127.0.0.1, file://, Live Server)
 (function() {
   // Check if already defined
   if (window.API_BASE_URL) {
     console.log('API_BASE_URL already defined:', window.API_BASE_URL);
     return;
   }
-
-  const isLocalHost = ['localhost', '127.0.0.1', ''].includes(window.location.hostname);
-  const isFileProtocol = window.location.protocol === 'file:';
-  const isLiveServer = isLocalHost && (window.location.port === '5500' || window.location.port === '3000');
 
   // Allow manual override via localStorage for flexibility
   const storedOverride = localStorage.getItem('API_BASE_URL_OVERRIDE');
@@ -19,11 +14,23 @@
     return;
   }
 
+  // Determine environment
+  const hostname = window.location.hostname;
+  const protocol = window.location.protocol;
+  const port = window.location.port;
+
+  const isLocalHost = ['localhost', '127.0.0.1', ''].includes(hostname);
+  const isFileProtocol = protocol === 'file:';
+  const isLiveServer = isLocalHost && (port === '5500' || port === '3000');
+
   if (isLocalHost || isFileProtocol || isLiveServer) {
+    // Local development
     window.API_BASE_URL = 'http://localhost:5000';
   } else {
-    // TODO: replace with your deployed backend URL when available
-    window.API_BASE_URL = 'https://your-backend-url.herokuapp.com';
+    // Production (Vercel)
+    // Vercel injects env vars via process.env during build
+    // Use window._env_ if using an env injection library, else hardcode your deployed backend URL
+    window.API_BASE_URL = window._env_?.API_BASE_URL || 'https://mealmender-backend.vercel.app';
   }
 
   console.log('API_BASE_URL configured:', window.API_BASE_URL);

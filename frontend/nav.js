@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
           </a>
         </li>
         <li class="nav-item">
-          <a class="nav-link ${currentPath === 'receiver.html' ? 'active' : ''}" href="receiver.html">Find Food</a>
+          <a class="nav-link ${currentPath === 'receiver_improved.html' || currentPath === 'receiver.html' ? 'active' : ''}" href="receiver_improved.html">Find Food</a>
         </li>
         <li class="nav-item">
           <a class="nav-link ${currentPath === 'donation.html' ? 'active' : ''}" href="donation.html">Donate</a>

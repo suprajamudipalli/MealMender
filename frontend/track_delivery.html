@@ -373,32 +373,79 @@
       // Get recipient location
       const recipientLocation = request.recipientLocation;
       
-      if (donorLocation && recipientLocation?.coordinates) {
-        const donorCoords = [donorLocation.lat || 28.6139, donorLocation.lng || 77.2090]; // Default Delhi
-        const recipientCoords = [recipientLocation.coordinates[1], recipientLocation.coordinates[0]];
-        
-        // Add markers
+      console.log('Donor Location:', donorLocation);
+      console.log('Recipient Location:', recipientLocation);
+      
+      // Check if we have coordinates
+      let donorCoords = null;
+      let recipientCoords = null;
+      
+      // Try to get donor coordinates
+      if (donorLocation) {
+        if (typeof donorLocation === 'object' && donorLocation.lat && donorLocation.lon) {
+          donorCoords = [donorLocation.lat, donorLocation.lon];
+        } else if (typeof donorLocation === 'string') {
+          // If it's just a string address, use default location (you can add geocoding here)
+          donorCoords = [28.6139, 77.2090]; // Default Delhi
+          console.log('Using default donor location');
+        }
+      }
+      
+      // Try to get recipient coordinates
+      if (recipientLocation && recipientLocation.coordinates && recipientLocation.coordinates.length === 2) {
+        recipientCoords = [recipientLocation.coordinates[1], recipientLocation.coordinates[0]]; // [lat, lng]
+      }
+      
+      if (donorCoords && recipientCoords) {
+        // Add donor marker
         donorMarker = L.marker(donorCoords, {
           icon: L.divIcon({
-            html: '<i class="fas fa-home fa-2x text-success"></i>',
+            html: '<div style="background: #10b981; color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; border: 3px solid white; box-shadow: 0 2px 10px rgba(0,0,0,0.3);"><i class="fas fa-home"></i></div>',
             className: 'custom-marker',
-            iconSize: [30, 30]
+            iconSize: [40, 40]
           })
-        }).addTo(map).bindPopup('Pickup Location');
+        }).addTo(map).bindPopup('<strong>Pickup Location</strong><br>' + (typeof donorLocation === 'string' ? donorLocation : 'Donor Location'));
         
+        // Add recipient marker
         recipientMarker = L.marker(recipientCoords, {
           icon: L.divIcon({
-            html: '<i class="fas fa-map-marker-alt fa-2x text-danger"></i>',
+            html: '<div style="background: #ef4444; color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; border: 3px solid white; box-shadow: 0 2px 10px rgba(0,0,0,0.3);"><i class="fas fa-map-marker-alt"></i></div>',
             className: 'custom-marker',
-            iconSize: [30, 30]
+            iconSize: [40, 40]
           })
-        }).addTo(map).bindPopup('Delivery Location');
+        }).addTo(map).bindPopup('<strong>Delivery Location</strong><br>Recipient Location');
         
-        // Fit bounds
+        // Fit bounds to show both markers
         map.fitBounds([donorCoords, recipientCoords], { padding: [50, 50] });
         
         // Get route from OSRM
         await getRoute(donorCoords, recipientCoords);
+      } else if (donorCoords) {
+        // Only donor location available
+        donorMarker = L.marker(donorCoords, {
+          icon: L.divIcon({
+            html: '<div style="background: #10b981; color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; border: 3px solid white; box-shadow: 0 2px 10px rgba(0,0,0,0.3);"><i class="fas fa-home"></i></div>',
+            className: 'custom-marker',
+            iconSize: [40, 40]
+          })
+        }).addTo(map).bindPopup('<strong>Pickup Location</strong>');
+        map.setView(donorCoords, 13);
+        document.getElementById('eta-display').textContent = 'Recipient location not available';
+      } else if (recipientCoords) {
+        // Only recipient location available
+        recipientMarker = L.marker(recipientCoords, {
+          icon: L.divIcon({
+            html: '<div style="background: #ef4444; color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; border: 3px solid white; box-shadow: 0 2px 10px rgba(0,0,0,0.3);"><i class="fas fa-map-marker-alt"></i></div>',
+            className: 'custom-marker',
+            iconSize: [40, 40]
+          })
+        }).addTo(map).bindPopup('<strong>Delivery Location</strong>');
+        map.setView(recipientCoords, 13);
+        document.getElementById('eta-display').textContent = 'Donor location not available';
+      } else {
+        // No locations available
+        document.getElementById('eta-display').textContent = 'Location data not available';
+        console.warn('No location data available for mapping');
       }
     }
 

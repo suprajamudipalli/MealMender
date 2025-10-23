@@ -11,10 +11,21 @@ router.post('/', protect, async (req, res) => {
   const { foodName, quantity, quality, type, expiry, pickupLocation, notes } = req.body;
 
   try {
+    // Extract numeric value from quantity string (e.g., "40 servings" -> 40)
+    const quantityMatch = quantity.match(/(\d+)/);
+    const numericQuantity = quantityMatch ? parseInt(quantityMatch[1]) : 1;
+    
+    // Extract unit (servings, kg, pieces, etc.)
+    const unitMatch = quantity.match(/\d+\s*(\w+)/);
+    const unit = unitMatch ? unitMatch[1] : 'servings';
+
     const donation = new Donation({
       donor: req.user.id,
       foodName,
       quantity,
+      originalQuantity: numericQuantity,
+      remainingQuantity: numericQuantity, // Initially all quantity is available
+      quantityUnit: unit,
       quality,
       type,
       expiry,
@@ -38,11 +49,22 @@ router.get('/', async (req, res) => {
   const page = Number(req.query.pageNumber) || 1;
 
   try {
-    const count = await Donation.countDocuments({ status: 'available' });
-    // Find donations that are not yet claimed/delivered
-    const donations = await Donation.find({ status: 'available' })
-      .populate('donor', 'username firstName lastName') // Get donor's name
-      .sort({ createdAt: -1 }) // Show newest first
+    // Find donations that are available or partially claimed (still have remaining quantity)
+    const count = await Donation.countDocuments({ 
+      $or: [
+        { status: 'available' },
+        { status: 'partially_claimed', remainingQuantity: { $gt: 0 } }
+      ]
+    });
+    
+    const donations = await Donation.find({ 
+      $or: [
+        { status: 'available' },
+        { status: 'partially_claimed', remainingQuantity: { $gt: 0 } }
+      ]
+    })
+      .populate('donor', 'username firstName lastName')
+      .sort({ createdAt: -1 })
       .limit(pageSize)
       .skip(pageSize * (page - 1));
 

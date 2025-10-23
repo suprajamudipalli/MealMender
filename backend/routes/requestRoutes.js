@@ -57,11 +57,11 @@ router.get('/my-requests', protect, async (req, res) => {
     const requests = await Request.find({ recipient: req.user.id })
       .populate({
         path: 'donation',
-        select: 'foodName quantity',
+        select: 'foodName quantity pickupLocation',
       })
       .populate({
         path: 'donor',
-        select: 'username firstName',
+        select: 'username firstName lastName email phone',
       })
       .sort({ createdAt: -1 });
 
@@ -80,11 +80,11 @@ router.get('/for-me', protect, async (req, res) => {
     const requests = await Request.find({ donor: req.user.id })
       .populate({
         path: 'donation',
-        select: 'foodName',
+        select: 'foodName quantity pickupLocation',
       })
       .populate({
         path: 'recipient',
-        select: 'username firstName',
+        select: 'username firstName lastName email phone',
       })
       .sort({ createdAt: -1 });
 
@@ -101,9 +101,18 @@ router.get('/for-me', protect, async (req, res) => {
 router.get('/:id', protect, async (req, res) => {
   try {
     const request = await Request.findById(req.params.id)
-      .populate('donation', 'foodName quantity pickupLocation')
-      .populate('donor', 'firstName lastName email phone')
-      .populate('recipient', 'firstName lastName email phone');
+      .populate({
+        path: 'donation',
+        select: 'foodName quantity pickupLocation'
+      })
+      .populate({
+        path: 'donor',
+        select: 'firstName lastName email phone'
+      })
+      .populate({
+        path: 'recipient',
+        select: 'firstName lastName email phone'
+      });
 
     if (!request) {
       return res.status(404).json({ message: 'Request not found' });
@@ -155,20 +164,52 @@ router.put('/:id/status', protect, async (req, res) => {
       return res.status(403).json({ message: 'Only donor can approve or reject requests.' });
     }
 
-    // If approved, mark the original donation as 'claimed' and reject other pending requests.
+    // If approved, handle partial quantity system
     if (status === 'Approved') {
       const donation = await Donation.findById(request.donation);
-      if (!donation || donation.status !== 'available') {
-        return res.status(400).json({ message: 'This donation is no longer available and cannot be approved.' });
+      if (!donation) {
+        return res.status(400).json({ message: 'Donation not found.' });
       }
       
-      await Donation.findByIdAndUpdate(request.donation, { status: 'claimed' });
+      // Check if donation has enough remaining quantity
+      if (donation.status === 'fully_claimed' || donation.remainingQuantity <= 0) {
+        return res.status(400).json({ message: 'This donation is no longer available.' });
+      }
+      
+      // Extract requested quantity number
+      const requestedQtyMatch = request.requestedQuantity?.match(/(\d+)/);
+      const requestedQty = requestedQtyMatch ? parseInt(requestedQtyMatch[1]) : 0;
+      
+      // Check if there's enough remaining
+      if (requestedQty > donation.remainingQuantity) {
+        return res.status(400).json({ 
+          message: `Only ${donation.remainingQuantity} ${donation.quantityUnit} remaining. Cannot approve request for ${requestedQty}.` 
+        });
+      }
+      
+      // Update remaining quantity
+      const newRemaining = donation.remainingQuantity - requestedQty;
+      
+      // Update donation status based on remaining quantity
+      let newStatus = 'available';
+      if (newRemaining === 0) {
+        newStatus = 'fully_claimed';
+      } else if (newRemaining < donation.originalQuantity) {
+        newStatus = 'partially_claimed';
+      }
+      
+      await Donation.findByIdAndUpdate(request.donation, { 
+        remainingQuantity: newRemaining,
+        status: newStatus
+      });
 
-      // Reject all other pending requests for this same donation
-      await Request.updateMany(
-        { donation: request.donation, status: 'Pending', _id: { $ne: request._id } },
-        { status: 'Rejected' }
-      );
+      // If fully claimed, reject all other pending requests
+      if (newStatus === 'fully_claimed') {
+        await Request.updateMany(
+          { donation: request.donation, status: 'Pending', _id: { $ne: request._id } },
+          { status: 'Rejected' }
+        );
+      }
 
       // Set tracking timestamp
       request.trackingStatus = { accepted: new Date() };
@@ -184,13 +225,20 @@ router.put('/:id/status', protect, async (req, res) => {
     if (status === 'Delivered') {
       if (!request.trackingStatus) request.trackingStatus = {};
       request.trackingStatus.delivered = new Date();
-      // Mark donation as delivered
-      await Donation.findByIdAndUpdate(request.donation, { status: 'delivered' });
+      
+      // Check if this was the last request for this donation
+      const donation = await Donation.findById(request.donation);
+      if (donation && donation.remainingQuantity === 0) {
+        await Donation.findByIdAndUpdate(request.donation, { status: 'delivered' });
+      }
     }
 
-    // If completed, mark the original donation as 'delivered'
+    // If completed, check if donation should be marked as delivered
     if (status === 'Completed') {
-      await Donation.findByIdAndUpdate(request.donation, { status: 'delivered' });
+      const donation = await Donation.findById(request.donation);
+      if (donation && donation.remainingQuantity === 0) {
+        await Donation.findByIdAndUpdate(request.donation, { status: 'delivered' });
+      }
     }
 
     request.status = status;

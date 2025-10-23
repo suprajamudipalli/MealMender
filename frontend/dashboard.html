@@ -25,7 +25,29 @@
 
     body {
       background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-end) 100%);
+      background-attachment: fixed;
       min-height: 100vh;
+      position: relative;
+    }
+    
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: 
+        radial-gradient(circle at 20% 50%, rgba(46, 125, 50, 0.03) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(102, 187, 106, 0.03) 0%, transparent 50%),
+        radial-gradient(circle at 40% 20%, rgba(46, 125, 50, 0.02) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: 0;
+    }
+    
+    .container {
+      position: relative;
+      z-index: 1;
     }
 
     .hero-section {
@@ -234,6 +256,11 @@
       <!-- Actions will be dynamically loaded based on role -->
     </div>
 
+    <!-- Notifications & Requests Section -->
+    <div id="notifications-section" class="row g-4 mt-4 d-none">
+      <!-- Notifications will be dynamically loaded -->
+    </div>
+
     <!-- Recent Activity -->
     <div id="recent-activity-section" class="recent-activity d-none">
       <h3 class="mb-4"><i class="fas fa-clock me-2"></i>Recent Activity</h3>
@@ -245,6 +272,6 @@
   <script src="config.js"></script>
   <script src="nav.js"></script>
   <script src="footer.js"></script>
-  <script src="dashboard_with_notifications.js"></script>
+  <script src="dashboard.js"></script>
 </body>
 </html>

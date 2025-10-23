@@ -279,7 +279,11 @@
               
               <div class="mb-2">
                 <i class="fas fa-weight-hanging text-success me-2"></i>
-                <strong>Quantity:</strong> ${donation.quantity}
+                <strong>Quantity:</strong> 
+                ${donation.remainingQuantity !== undefined && donation.remainingQuantity < donation.originalQuantity 
+                  ? `<span class="text-warning">${donation.remainingQuantity} ${donation.quantityUnit || 'servings'} remaining</span> <small class="text-muted">(of ${donation.originalQuantity})</small>`
+                  : donation.quantity
+                }
               </div>
               
               <div class="mb-2">

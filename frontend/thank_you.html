@@ -108,12 +108,12 @@
           ❤️
         </div>
         
-        <!-- Thank You Message -->
-        <h1 class="display-3 fw-bold mb-3" style="color: #10b981;">
+        <!-- Thank You Message (Dynamic based on role) -->
+        <h1 class="display-3 fw-bold mb-3" style="color: #10b981;" id="thank-you-title">
           Thank You for Making a Difference!
         </h1>
         
-        <p class="lead text-muted mb-4">
+        <p class="lead text-muted mb-4" id="thank-you-message">
           Your contribution has helped reduce food waste and feed someone in need.
           Together, we're building a more sustainable and caring community.
         </p>
@@ -158,17 +158,9 @@
           </div>
         </div>
         
-        <!-- Action Buttons -->
-        <div class="mt-5 d-flex gap-3 justify-content-center flex-wrap">
-          <button class="btn btn-success btn-lg" onclick="window.location.href='donation.html'">
-            <i class="fas fa-heart me-2"></i>Donate More Food
-          </button>
-          <button class="btn btn-primary btn-lg" onclick="window.location.href='dashboard.html'">
-            <i class="fas fa-home me-2"></i>Go to Dashboard
-          </button>
-          <button class="btn btn-outline-secondary btn-lg" onclick="window.location.href='receiver.html'">
-            <i class="fas fa-search me-2"></i>Browse Food
-          </button>
+        <!-- Action Buttons (Dynamic based on role) -->
+        <div class="mt-5 d-flex gap-3 justify-content-center flex-wrap" id="action-buttons">
+          <!-- Buttons will be dynamically loaded -->
         </div>
         
         <!-- Additional Message -->
@@ -183,12 +175,9 @@
           </p>
         </div>
         
-        <!-- Testimonial -->
-        <div class="mt-4 p-4 border-start border-5 border-success bg-white rounded">
-          <p class="fst-italic mb-2">
-            "The food I received was fresh and delicious. Thank you for your kindness!"
-          </p>
-          <small class="text-muted">- A grateful recipient</small>
+        <!-- Testimonial (Dynamic based on role) -->
+        <div class="mt-4 p-4 border-start border-5 border-success bg-white rounded" id="testimonial-section">
+          <!-- Testimonial will be dynamically loaded -->
         </div>
       </div>
     </div>
@@ -205,13 +194,29 @@
     const urlParams = new URLSearchParams(window.location.search);
     const requestId = urlParams.get('requestId');
     const token = localStorage.getItem('authToken');
+    let currentUser = null;
+    let requestData = null;
 
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', async () => {
       createConfetti();
+      await loadCurrentUser();
       if (requestId && token) {
-        loadImpactStats();
+        await loadImpactStats();
       }
     });
+
+    async function loadCurrentUser() {
+      try {
+        const response = await fetch(`${window.API_BASE_URL}/api/profile/me`, {
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        if (response.ok) {
+          currentUser = await response.json();
+        }
+      } catch (error) {
+        console.error('Error loading user:', error);
+      }
+    }
 
     function createConfetti() {
       const colors = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6'];
@@ -238,11 +243,66 @@
         });
 
         if (response.ok) {
-          const request = await response.json();
-          updateStats(request);
+          requestData = await response.json();
+          updateStats(requestData);
+          updateContentBasedOnRole(requestData);
         }
       } catch (error) {
         console.error('Error loading stats:', error);
+      }
+    }
+
+    function updateContentBasedOnRole(request) {
+      const isDonor = currentUser && currentUser._id === request.donor?._id;
+      
+      if (isDonor) {
+        // Donor content
+        document.getElementById('thank-you-title').textContent = 'Thank You for Your Generous Donation!';
+        document.getElementById('thank-you-message').textContent = 
+          'Your kindness has made a real difference! By sharing your food, you\'ve helped reduce waste and brought joy to someone in need. You\'re a true hero in the fight against hunger and food waste.';
+        
+        document.getElementById('action-buttons').innerHTML = `
+          <button class="btn btn-success btn-lg" onclick="window.location.href='donation.html'">
+            <i class="fas fa-heart me-2"></i>Donate More Food
+          </button>
+          <button class="btn btn-primary btn-lg" onclick="window.location.href='dashboard.html'">
+            <i class="fas fa-home me-2"></i>Go to Dashboard
+          </button>
+          <button class="btn btn-outline-secondary btn-lg" onclick="window.location.href='my_donations.html'">
+            <i class="fas fa-gift me-2"></i>My Donations
+          </button>
+        `;
+        
+        document.getElementById('testimonial-section').innerHTML = `
+          <p class="fst-italic mb-2">
+            "Thank you so much for the delicious food! Your generosity means the world to me and my family."
+          </p>
+          <small class="text-muted">- A grateful recipient</small>
+        `;
+      } else {
+        // Recipient content
+        document.getElementById('thank-you-title').textContent = 'Thank You for Receiving!';
+        document.getElementById('thank-you-message').textContent = 
+          'We hope the food was fresh and delicious! By accepting this donation, you\'ve helped prevent food waste and supported our community. Together, we\'re building a more sustainable future.';
+        
+        document.getElementById('action-buttons').innerHTML = `
+          <button class="btn btn-success btn-lg" onclick="window.location.href='receiver_improved.html'">
+            <i class="fas fa-search me-2"></i>Browse More Food
+          </button>
+          <button class="btn btn-primary btn-lg" onclick="window.location.href='dashboard.html'">
+            <i class="fas fa-home me-2"></i>Go to Dashboard
+          </button>
+          <button class="btn btn-outline-secondary btn-lg" onclick="window.location.href='my_requests.html'">
+            <i class="fas fa-list me-2"></i>My Requests
+          </button>
+        `;
+        
+        document.getElementById('testimonial-section').innerHTML = `
+          <p class="fst-italic mb-2">
+            "It feels amazing to help reduce food waste while helping those in need. Every donation counts!"
+          </p>
+          <small class="text-muted">- A generous donor</small>
+        `;
       }
     }
 
